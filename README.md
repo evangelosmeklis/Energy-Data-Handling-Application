@@ -14,6 +14,17 @@ The authors of this assignment are:
 
 3. Panagiotis Haratsaris
 
-The api can be run by going inside the folder using cd softeng and then running the command: node server.js
+The api can be run by going inside the folder using 
+
+```
+cd softeng
+
+```
+
+ and then running the command: 
+ 
+ ```
+ node server.js
+```
 
 Postman should be used for testing get links
