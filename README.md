@@ -1,10 +1,10 @@
-#:computer: Software Engineering Assignment for NTUA Software Engineering Course (Fall 2019-2020)
+# :computer: Software Engineering Assignment for NTUA Software Engineering Course (Fall 2019-2020)
 
-#:book: Contents
+# :book: Contents
 
 This repository contains the files for the semester assignment for the Software Engineering Course of the ECE School in NTUA. 
 
-#:pencil: Authors
+# :pencil: Authors
 
 The authors of this assignment are:
 
