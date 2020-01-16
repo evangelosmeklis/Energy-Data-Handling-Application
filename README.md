@@ -2,7 +2,7 @@
 
 # :book: Contents
 
-This repository contains the files for the semester assignment for the Software Engineering Course of the ECE School in NTUA. 
+This repository contains the files for the semester assignment for the Software Engineering Course of the ECE School in NTUA.  It comprises of an API and a CLI.
 
 # :pencil: Authors
 
