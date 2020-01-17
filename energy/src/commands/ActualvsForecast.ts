@@ -1,60 +1,59 @@
 import Command from '@oclif/command'
 import axios from 'axios'
+import {flags} from '@oclif/command'
 
 export class ActualvsForecastCommand extends Command {
-  static args = [
-  	{name: 'Area', required: true},
-    {name: 'AreaName', required : true},
-    {name: 'timeres', required: true},
-    {name: 'Resolution', required: true},
-    {name: 'dateformat', required: true},
-    {name: 'dateinput', required: true},
-    {name: 'beforeformat', required: false},
-    {name: 'format' , required: false}
-  ]
+  static flags = {
+  	area: flags.string({multiple: true}),
+    timeres: flags.string(),
+    date: flags.string(),
+    month: flags.string(),
+    year: flags.string(),
+    format: flags.string()
+  }
   async run() {
 
 	const axios = require('axios');
-	const {args} = this.parse(ActualvsForecastCommand); 
-	//console.log(`${args.format}`);
-	if (`${args.dateformat}`=='--date'){
-	 var splitted = `${args.dateinput}`.split("-", 3); 
-	 console.log('http://localhost:8765/energy/api/ActualvsForecast/' +`${args.AreaName}` +'/' + `${args.Resolution}` +'/date/' + splitted[0] +'-' + splitted[1] + '-' + splitted[2]+ "/format=" + `${args.format}`);
-	 if (`${args.format}`== "undefined" || `${args.format}`=="json"){
-	 const data= await axios.get('http://localhost:8765/energy/api/ActualvsForecast/' +`${args.AreaName}` +'/' + `${args.Resolution}` +'/date/' + splitted[0] +'-' + splitted[1] + '-' + splitted[2]);
+	const {flags} = this.parse(ActualvsForecastCommand); 
+	//console.log(`${flags.format}`);
+	if (`${flags.date}` !=="undefined"){
+	 var splitted = `${flags.date}`.split("-", 3); 
+	// console.log('http://localhost:8765/energy/api/ActualvsForecast/' +`${flags.area}` +'/' + `${flags.timeres}` +'/date/' + splitted[0] +'-' + splitted[1] + '-' + splitted[2]+ "/format=" + `${flags.format}`);
+	 if (`${flags.format}`== "undefined" || `${flags.format}`=="json"){
+	 const data= await axios.get('http://localhost:8765/energy/api/ActualvsForecast/' +`${flags.area}` +'/' + `${flags.timeres}` +'/date/' + splitted[0] +'-' + splitted[1] + '-' + splitted[2]);
 	 	 console.log(data.data);
 	 }
-	 else if (`${args.format}`=="csv") {
-	 	 const data= await axios.get('http://localhost:8765/energy/api/ActualvsForecast/' +`${args.AreaName}` +'/' + `${args.Resolution}` +'/date/' + splitted[0] +'-' + splitted[1] + '-' + splitted[2]+ "/format=" + `${args.format}`);
+	 else if (`${flags.format}`=="csv") {
+	 	 const data= await axios.get('http://localhost:8765/energy/api/ActualvsForecast/' +`${flags.area}` +'/' + `${flags.timeres}` +'/date/' + splitted[0] +'-' + splitted[1] + '-' + splitted[2]+ "/format=" + `${flags.format}`);
 	 	 console.log(data.data);
 	 }
 	 else console.log("Error 400: Bad Request");
 
 	}
 
-	else if (`${args.dateformat}`=='--month'){
-	 	 var splitted = `${args.dateinput}`.split("-", 2); 
-	 	 	 if (`${args.format}`== "undefined" || `${args.format}`=="json"){
-	 const data= await axios.get('http://localhost:8765/energy/api/ActualvsForecast/' +`${args.AreaName}` +'/' +  `${args.Resolution}` +'/month/' + splitted[0] +'-' + splitted[1]);
+	else if (`${flags.month}` !=="undefined"){
+	 	 var splitted = `${flags.month}`.split("-", 2); 
+	 	 	 if (`${flags.format}`== "undefined" || `${flags.format}`=="json"){
+	 const data= await axios.get('http://localhost:8765/energy/api/ActualvsForecast/' +`${flags.area}` +'/' +  `${flags.timeres}` +'/month/' + splitted[0] +'-' + splitted[1]);
 	 			 console.log(data.data);
 	 		}
 
-	 	 else if (`${args.format}`=="csv") {
-	 	 const data= await axios.get('http://localhost:8765/energy/api/ActualvsForecast/' +`${args.AreaName}` +'/' + `${args.Resolution}` +'/month/' + splitted[0] +'-' + splitted[1] + "/format=" + `${args.format}`);
+	 	 else if (`${flags.format}`=="csv") {
+	 	 const data= await axios.get('http://localhost:8765/energy/api/ActualvsForecast/' +`${flags.area}` +'/' + `${flags.timeres}` +'/month/' + splitted[0] +'-' + splitted[1] + "/format=" + `${flags.format}`);
 	 	 console.log(data.data);
 	    }
 	    
 	    else console.log("Error 400: Bad Request");
 	}
 	
-	else if (`${args.dateformat}`=='--year'){
-	 if (`${args.format}`== "undefined" || `${args.format}`=="json"){
-	 const data= await axios.get('http://localhost:8765/energy/api/ActualvsForecast/' +`${args.AreaName}` +'/'  + `${args.Resolution}` +'/year/' +`${args.dateinput}`);
+	else if (`${flags.year}` !=="undefined"){
+	 if (`${flags.format}`== "undefined" || `${flags.format}`=="json"){
+	 const data= await axios.get('http://localhost:8765/energy/api/ActualvsForecast/' +`${flags.area}` +'/'  + `${flags.timeres}` +'/year/' +`${flags.year}`);
 	 console.log(data.data);
 	 }
 	 
-	 else if (`${args.format}`=="csv") {
-	 	 const data= await axios.get('http://localhost:8765/energy/api/ActualvsForecast/' +`${args.AreaName}` +'/'  + `${args.Resolution}` +'/year/' + `${args.dateinput}` + "/format=" + `${args.format}`);
+	 else if (`${flags.format}`=="csv") {
+	 	 const data= await axios.get('http://localhost:8765/energy/api/ActualvsForecast/' +`${flags.area}` +'/'  + `${flags.timeres}` +'/year/' + `${flags.year}` + "/format=" + `${flags.format}`);
 	 	 console.log(data.data);
 	    }
 	  
