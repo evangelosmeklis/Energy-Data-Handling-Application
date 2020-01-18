@@ -35,8 +35,33 @@ export class AdminCommand extends Command {
 		if (pass=="ntua_softeng"){
 		    await cli.anykey();
 			if (`${flags.newuser}` !== "undefined" && `${flags.passw}` !== "undefined" && `${flags.email}` !== "undefined" && `${flags.quota}` !== "undefined" ){
-			    //console.log("inside");
-				await connection.query(`INSERT INTO users VALUES (?,?,?,?)`,[`${flags.newuser}`,`${flags.passw}`,`${flags.email}`,`${flags.quota}`]);
+				//Create apikey
+				var a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".split("");
+				var b = [];  
+				for (var i=0; i<12; i++) {
+					var j = (Math.random() * (a.length-1)).toFixed(0);
+					b[i] = a[j];
+				}
+				var res=b.join("");
+				var count=0;
+				const result = [res[0]];
+				for(let x=1; x<res.length; x++)
+				  {
+				    count=count+1;
+					if(count==4)
+					 {
+					  result.push('-', res[x]);
+					  count=0;
+					 }
+					else
+					 {
+					  result.push(res[x]);
+					 }
+				  }
+				const apikey=result.join('');
+			    //insert into table
+				await connection.query(`INSERT INTO users VALUES (?,?,?,?,?)`,[`${flags.newuser}`,`${flags.passw}`,`${flags.email}`,`${flags.quota}`,apikey]);
+				console.log(apikey+" ");
 				console.log("Succesful");
 			}
 			else if (`${flags.moduser}` !== "undefined" && `${flags.passw}` !== "undefined" && `${flags.email}` !== "undefined" && `${flags.quota}` !== "undefined" ){
@@ -44,15 +69,17 @@ export class AdminCommand extends Command {
 				console.log("Succesful");
 			}
 			else if (`${flags.userstatus}` !== "undefined"){
-				const ret=await connection.query(`SELECT user,email,quota FROM users WHERE user=?`,[`${flags.userstatus}`],function(err,result,fields){
+				const ret=await connection.query(`SELECT user,email,apikey,quota FROM users WHERE user=?`,[`${flags.userstatus}`],function(err,result,fields){
 					if (err) throw err;
 					console.log(result);
 				});
 			}
 			else if (`${flags.newdata}` !== "undefined" && `${flags.source}` !== "undefined" ){
 				await connection.query(`LOAD DATA LOCAL INFILE ? CHARACTER SET UTF8 INTO TABLE ?  FIELDS TERMINATED BY ';' LINES TERMINATED BY '\r\n' 
-					IGNORE 1 LINES;`,[`${flags.source}`,`${flags.source}`]);
-				console.log("Succesful");
+					IGNORE 1 LINES;`,[`${flags.source}`,`${flags.source}`],function(err,result,fields){
+					if (err) throw err;
+					console.log(result);
+					});
 			}
 			else console.log("Unsuccesful" + `${flags.newuser}`,`${flags.pass}`,`${flags.email}`,`${flags.quota}`);
 		}
