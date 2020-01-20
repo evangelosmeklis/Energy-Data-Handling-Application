@@ -1,4 +1,5 @@
 const Entry = require("../models/ActualTotalLoad.model.js");
+const sql = require("../models/db.js");
 
 // Find a single Customer with a customerId
 exports.findOne = (req, res) => {

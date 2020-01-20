@@ -3,6 +3,7 @@ import cli from 'cli-ux'
 import {Command} from '@oclif/command'
 import {createConnection} from "typeorm";
 import {flags} from  '@oclif/command'
+const bcrypt = require('bcrypt');
 
 export class AdminCommand extends Command {
   static flags = { 
@@ -32,7 +33,7 @@ export class AdminCommand extends Command {
 	if (username=="superuser"){
 	// mask input on keypress (before enter is pressed)
 		var pass=await cli.prompt('Please Enter Password?', {type: 'hide'})
-		if (pass=="ntua_softeng"){
+		if (pass=="1212"){
 		    await cli.anykey();
 			if (`${flags.newuser}` !== "undefined" && `${flags.passw}` !== "undefined" && `${flags.email}` !== "undefined" && `${flags.quota}` !== "undefined" ){
 				//Create apikey
@@ -60,12 +61,15 @@ export class AdminCommand extends Command {
 				  }
 				const apikey=result.join('');
 			    //insert into table
-				await connection.query(`INSERT INTO users VALUES (?,?,?,?,?)`,[`${flags.newuser}`,`${flags.passw}`,`${flags.email}`,`${flags.quota}`,apikey]);
+			    let hash = bcrypt.hashSync(`${flags.passw}`,10);
+			    console.log(hash);
+				await connection.query(`INSERT INTO users VALUES (?,?,?,?,?)`,[`${flags.newuser}`,hash,`${flags.email}`,`${flags.quota}`,apikey]);
 				console.log(apikey+" ");
 				console.log("Succesful");
 			}
 			else if (`${flags.moduser}` !== "undefined" && `${flags.passw}` !== "undefined" && `${flags.email}` !== "undefined" && `${flags.quota}` !== "undefined" ){
-				await connection.query(`UPDATE users SET  pass=?,email=?,quota=? WHERE user=?  `,[`${flags.passw}`,`${flags.email}`,`${flags.quota}`,`${flags.moduser}`]);
+			    let hash = bcrypt.hashSync(`${flags.passw}`);
+				await connection.query(`UPDATE users SET  pass=?,email=?,quota=? WHERE user=?  `,[hash,`${flags.email}`,`${flags.quota}`,`${flags.moduser}`]);
 				console.log("Succesful");
 			}
 			else if (`${flags.userstatus}` !== "undefined"){
