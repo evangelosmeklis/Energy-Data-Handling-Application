@@ -15,6 +15,9 @@ export class ActualvsForecastCommand extends Command {
 
 	const axios = require('axios');
 	const {flags} = this.parse(ActualvsForecastCommand); 
+	var fs=require('fs');
+	var token = fs.readFileSync('temptoken.txt');
+	axios.defaults.headers.common['Authorization']=token;
 	//console.log(`${flags.format}`);
 	if (`${flags.date}` !=="undefined"){
 	 var splitted = `${flags.date}`.split("-", 3); 

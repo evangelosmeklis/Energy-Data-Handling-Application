@@ -28,12 +28,17 @@ export class AdminCommand extends Command {
     connection.connect();
     
     const {flags} = this.parse(AdminCommand); 
-
-	var username= await cli.prompt('Please Enter Username')
-	if (username=="superuser"){
+	var fs=require('fs');
+	var token = fs.readFileSync('temptoken.txt');
+	var privateKey = fs.readFileSync('private.key');
+	var jwt=require('jsonwebtoken');
+	//console.log(token);
+	var decoded=jwt.decode(token,privateKey);
+	//console.log(decoded.privileges); 
+	//var username= await cli.prompt('Please Enter Username')
+	if (decoded.privileges=="superuser"){
 	// mask input on keypress (before enter is pressed)
-		var pass=await cli.prompt('Please Enter Password?', {type: 'hide'})
-		if (pass=="1212"){
+		//var pass=await cli.prompt('Please Enter Password?', {type: 'hide'})
 		    await cli.anykey();
 			if (`${flags.newuser}` !== "undefined" && `${flags.passw}` !== "undefined" && `${flags.email}` !== "undefined" && `${flags.quota}` !== "undefined" ){
 				//Create apikey
@@ -63,7 +68,7 @@ export class AdminCommand extends Command {
 			    //insert into table
 			    let hash = bcrypt.hashSync(`${flags.passw}`,10);
 			    console.log(hash);
-				await connection.query(`INSERT INTO users VALUES (?,?,?,?,?)`,[`${flags.newuser}`,hash,`${flags.email}`,`${flags.quota}`,apikey]);
+				await connection.query(`INSERT INTO users VALUES (?,?,?,?,?,?)`,[`${flags.newuser}`,hash,`${flags.email}`,`${flags.quota}`,apikey,'user']);
 				console.log(apikey+" ");
 				console.log("Succesful");
 			}
@@ -86,10 +91,9 @@ export class AdminCommand extends Command {
 					});
 			}
 			else console.log("Unsuccesful" + `${flags.newuser}`,`${flags.pass}`,`${flags.email}`,`${flags.quota}`);
-		}
-		else console.log("Wrong password");
     }
-   else console.log("Wrong username");
+    else console.log("Error: Unauthorized Action. You must be logged in as superuser");
+   connection.end();
   }
 }
 

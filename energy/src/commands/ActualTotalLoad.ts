@@ -14,6 +14,9 @@ export class ActualTotalLoadCommand extends Command {
   async run() {
 	const axios = require('axios');
 	const {flags} = this.parse(ActualTotalLoadCommand); 
+	var fs=require('fs');
+	var token = fs.readFileSync('temptoken.txt');
+	axios.defaults.headers.common['Authorization']=token;
 	//console.log(`${flags.area}`,`${flags.timeres}`,`${flags.date}`,`${flags.format}`);
 	if (`${flags.date}` !== "undefined"){
 	 var splitted = `${flags.date}`.split("-", 3); 

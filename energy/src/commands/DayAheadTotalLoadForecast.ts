@@ -16,6 +16,9 @@ export class ForecastCommand extends Command {
 	const axios = require('axios');
 	const {flags} = this.parse(ForecastCommand); 
 	//console.log(`${flags.format}`);
+	var fs=require('fs');
+	var token = fs.readFileSync('temptoken.txt');
+	axios.defaults.headers.common['Authorization']=token;
 	if (`${flags.date}` !== "undefined"){
 	 var splitted = `${flags.date}`.split("-", 3); 
 	 console.log('https://localhost:8765/energy/api/DayAheadTotalLoadForecast/' +`${flags.area}` +'/' + `${flags.timeres}` +'/date/' + splitted[0] +'-' + splitted[1] + '-' + splitted[2]+ "?format=" + `${flags.format}`);
