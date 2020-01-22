@@ -62,77 +62,102 @@ module.exports = app => {
   		});
   });
   
-  app.post("/energy/api/Admin/users", function(req,res){
-		var a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".split("");
-		var b = [];  
-		for (var i=0; i<12; i++) {
-				var j = (Math.random() * (a.length-1)).toFixed(0);
-				b[i] = a[j];
-		}
-		var rest=b.join("");
-		var count=0;
-		const resul = [rest[0]];
-		for(let x=1; x<rest.length; x++){
-				count=count+1;
-				if(count==4)
-				{
-					resul.push('-', rest[x]);
-					count=0;
+  function getResults(key) {
+  return new Promise((resolve, reject) => {
+    sql.query("SELECT apikey,privileges FROM users WHERE apikey=?", [key], (err, res1) => {
+      if (err) {
+        console.log("error: ", err);
+        reject(err);
+      } else if (res1.length && res1[0].privileges == "superuser") {
+        console.log("Apikey correct");
+        resolve(1);
+      } else {
+        resolve(0);
+      }
+    });
+  });
+}
+  
+  app.post("/energy/api/Admin/users",async function(req,res){
+  		const correct =await getResults(req.user.apikey);
+  		console.log(correct);
+			if (correct==1){
+				var a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".split("");
+				var b = [];  
+				for (var i=0; i<12; i++) {
+						var j = (Math.random() * (a.length-1)).toFixed(0);
+						b[i] = a[j];
 				}
-				else
-					{
-					  resul.push(rest[x]);
-					}
-			}
-		const apikey=resul.join('');
-		//console.log(apikey);
-		//insert into table
-		//console.log(req.query.passw);
-		let hash = bcrypt.hashSync(req.query.passw,10);
-		
-		//console.log(hash);
-		if (req.query.username !== "undefined" && req.query.email !== "undefined" && req.query.quota !== "undefined"){ 
-			sql.query(`INSERT INTO users VALUES (?,?,?,?,?,?)`,[req.query.username,hash,req.query.email,req.query.quota,apikey,'user'],(err,res) => {
-						if (err) {
-						  console.log("error: ", err);
-						  result(err, null);
-						  return;
+				var rest=b.join("");
+				var count=0;
+				const resul = [rest[0]];
+				for(let x=1; x<rest.length; x++){
+						count=count+1;
+						if(count==4)
+						{
+							resul.push('-', rest[x]);
+							count=0;
 						}
-		});
+						else
+							{
+							  resul.push(rest[x]);
+							}
+					}
+				const apik=resul.join('');
+				//console.log(apikey);
+				//insert into table
+				//console.log(req.query.passw);
+				//console.log(hash);
+				if (req.query.username !== "undefined" && req.query.email !== "undefined" && req.query.quota !== "undefined"){ 
+					sql.query(`INSERT INTO users VALUES (?,?,?,?,?,?)`,[req.query.username,req.query.passw,req.query.email,req.query.quota,apik,'user'],(err,res2) => {
+								if (err) {
+								  console.log("error: ", err);
+								  result(err, null);
+								  return;
+								}
+				});
 
-		}
-		res.send("Succesful "+apikey);
-
-		
+				}
+				res.send("Succesful "+apik);
+			}
+			else res.status(401).send("Not authorized");
   });
   
   app.get("/energy/api/Admin/users/:username",entry.userstatus);
   
-  app.put("/energy/api/Admin/users/:username", function(req,res){
-		let hash = bcrypt.hashSync(req.query.passw,10);
-		
-		//console.log(hash);
-		if (req.params.username !== "undefined" && req.query.email !== "undefined" && req.query.quota !== "undefined"){ 
-			sql.query(`UPDATE users SET pass=?,email=?,quota=? WHERE user=?`,[hash,req.query.email,req.query.quota,req.params.username],(err,res) => {
-						if (err) {
-						  console.log("error: ", err);
-						  result(err, null);
-						  return;
-						}
-		});
-
+  app.put("/energy/api/Admin/users/:username", function(req,res){		
+  		const correct =await getResults(req.user.apikey);
+  		console.log(correct);
+		if (correct==1){
+			//console.log(hash);
+			if (req.params.username !== "undefined" && req.query.email !== "undefined" && req.query.quota !== "undefined"){ 
+				sql.query(`UPDATE users SET pass=?,email=?,quota=? WHERE user=?`,[req.query.passw,req.query.email,req.query.quota,req.params.username],(err,res) => {
+							if (err) {
+							  console.log("error: ", err);
+							  result(err, null);
+							  return;
+							}
+			});
+			}
+			res.send("Succesful");
 		}
-		res.send("Succesful");
+		else res.status(401).send("Not authorized");
+
   });
     
   app.post("/energy/api/Admin/:table",function(req,res){
-	  sql.query(`LOAD DATA LOCAL INFILE ? CHARACTER SET UTF8 INTO TABLE ?  FIELDS TERMINATED BY ';' LINES TERMINATED BY '\r\n' IGNORE 1 LINES; `,[csvfile,table],(err,res) => {
-						if (err) {
-						  console.log("error: ", err);
-						  result(err, null);
-						  return;
-						}
-		});
+ 	  const correct =await getResults(req.user.apikey);
+  	  console.log(correct);
+	  if (correct==1){
+		  sql.query(`LOAD DATA LOCAL INFILE ? CHARACTER SET UTF8 INTO TABLE ?  FIELDS TERMINATED BY ';' LINES TERMINATED BY '\r\n' IGNORE 1 LINES; `,[csvfile,table],(err,res) => {
+							if (err) {
+							  console.log("error: ", err);
+							  result(err, null);
+							  return;
+							}
+			});
+	 }
+	 else res.status(401).send("Not authorized");
 
   });
    

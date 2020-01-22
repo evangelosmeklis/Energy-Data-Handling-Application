@@ -20,46 +20,35 @@ export class AdminCommand extends Command {
   async run() {
     const {flags} = this.parse(AdminCommand); 
 	var fs=require('fs');
-	var token = fs.readFileSync('temptoken.txt');
 	var privateKey = fs.readFileSync('private.key');
 	var jwt=require('jsonwebtoken');
-	//console.log(token);
-	var decoded=jwt.decode(token,privateKey);
-	//console.log(decoded.privileges); 
-	//var username= await cli.prompt('Please Enter Username')
-	if (decoded.privileges=="superuser"){
-	// mask input on keypress (before enter is pressed)
-		//var pass=await cli.prompt('Please Enter Password?', {type: 'hide'})
-		    await cli.anykey();
-		    //create new user
-			if (`${flags.newuser}` !== "undefined" && `${flags.passw}` !== "undefined" && `${flags.email}` !== "undefined" && `${flags.quota}` !== "undefined" ){
-				let hash = bcrypt.hashSync(`${flags.passw}`);
-				await axios.post('https://localhost:8765/energy/api/Admin/users?' +`${flags.newuser}` +'&passw' + hash +'&email=' + `${flags.email}`  +'&quota=' + `${flags.quota}`);
+	var token = fs.readFileSync('softeng19bAPI.token');
+	axios.defaults.headers.common['Authorization']="Bearer " + token;
+	await cli.anykey();
+	//create new user
+	if (`${flags.newuser}` !== "undefined" && `${flags.passw}` !== "undefined" && `${flags.email}` !== "undefined" && `${flags.quota}` !== "undefined" ){
+			let hash = bcrypt.hashSync(`${flags.passw}`,10);
+			await axios.post('https://localhost:8765/energy/api/Admin/users?username=' +`${flags.newuser}` +'&passw=' + hash +'&email=' + `${flags.email}`  +'&quota=' + `${flags.quota}`);
 				
-			}
-			//modify user
-			else if (`${flags.moduser}` !== "undefined" && `${flags.passw}` !== "undefined" && `${flags.email}` !== "undefined" && `${flags.quota}` !== "undefined" ){
-			    let hash = bcrypt.hashSync(`${flags.passw}`);
-				await axios.post('https://localhost:8765/energy/api/Admin/users?' +`${flags.newuser}` +'&passw=' + hash +'&email=' + `${flags.email}`  +'&quota=' + `${flags.quota}`);
-			}
-			//get userstatus
-			else if (`${flags.userstatus}` !== "undefined" && `${flags.passw}` == "undefined"){
-				await 	axios.get('https://localhost:8765/energy/api/Admin/users/' +`${flags.userstatus}`);		   
-				
-			}
-			else if (`${flags.userstatus}` !== "undefined" && `${flags.passw}` !== "undefined" && `${flags.email}` !== "undefined" && `${flags.quota}` !== "undefined"){
-				let hash = bcrypt.hashSync(`${flags.passw}`);
-				await 	axios.put('https://localhost:8765/energy/api/Admin/users/' +`${flags.userstatus}`+'?passw=' + hash +'&email=' + `${flags.email}`  +'&quota=' + `${flags.quota}`);		   
-				
-			}
-			//insert new data
-			else if (`${flags.newdata}` !== "undefined" && `${flags.source}` !== "undefined" ){
-				await 	axios.post('https://localhost:8765/energy/api/Admin/' +`${flags.newdata}` + '?' + `${flags.source}`);		   
-			}
-			else console.log("Unsuccesful" + `${flags.newuser}`,`${flags.pass}`,`${flags.email}`,`${flags.quota}`);
+	}
+	//modify user
+	else if (`${flags.moduser}` !== "undefined" && `${flags.passw}` !== "undefined" && `${flags.email}` !== "undefined" && `${flags.quota}` !== "undefined" ){
+		let hash = bcrypt.hashSync(`${flags.passw}`,10);
+		await axios.post('https://localhost:8765/energy/api/Admin/users?username=' +`${flags.newuser}` +'&passw=' + hash +'&email=' + `${flags.email}`  +'&quota=' + `${flags.quota}`);
+	}
+	//get userstatus
+	else if (`${flags.userstatus}` !== "undefined" && `${flags.passw}` == "undefined"){
+		await 	axios.get('https://localhost:8765/energy/api/Admin/users/' +`${flags.userstatus}`);		   			
+	}
+	else if (`${flags.userstatus}` !== "undefined" && `${flags.passw}` !== "undefined" && `${flags.email}` !== "undefined" && `${flags.quota}` !== "undefined"){
+		let hash = bcrypt.hashSync(`${flags.passw}`,10);
+		await 	axios.put('https://localhost:8765/energy/api/Admin/users/' +`${flags.userstatus}`+'?passw=' + hash +'&email=' + `${flags.email}`  +'&quota=' + `${flags.quota}`);		   		
+	}
+	//insert new data
+	else if (`${flags.newdata}` !== "undefined" && `${flags.source}` !== "undefined" ){
+		await 	axios.post('https://localhost:8765/energy/api/Admin/' +`${flags.newdata}` + '?' + `${flags.source}`);		   
+	}
+	else console.log("Unsuccesful" + `${flags.newuser}`,`${flags.pass}`,`${flags.email}`,`${flags.quota}`);
     }
-    else console.log("Error: Unauthorized Action. You must be logged in as superuser");
-   connection.end();
-  }
 }
 
