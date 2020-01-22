@@ -4,6 +4,7 @@ import {Command} from '@oclif/command'
 import {createConnection} from "typeorm";
 import {flags} from  '@oclif/command'
 const bcrypt = require('bcrypt');
+const axios=require('axios');
 
 export class AdminCommand extends Command {
   static flags = { 
@@ -17,16 +18,6 @@ export class AdminCommand extends Command {
     source: flags.string()
   }
   async run() {
-    var mysql=require('mysql')
-    var connection=mysql.createConnection({
-    	host: 'localhost',
-    	user: 'root',
-    	password: 'Vangelis98!',
-    	database: 'vag'
-    });
-    
-    connection.connect();
-    
     const {flags} = this.parse(AdminCommand); 
 	var fs=require('fs');
 	var token = fs.readFileSync('temptoken.txt');
@@ -40,55 +31,30 @@ export class AdminCommand extends Command {
 	// mask input on keypress (before enter is pressed)
 		//var pass=await cli.prompt('Please Enter Password?', {type: 'hide'})
 		    await cli.anykey();
+		    //create new user
 			if (`${flags.newuser}` !== "undefined" && `${flags.passw}` !== "undefined" && `${flags.email}` !== "undefined" && `${flags.quota}` !== "undefined" ){
-				//Create apikey
-				var a = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".split("");
-				var b = [];  
-				for (var i=0; i<12; i++) {
-					var j = (Math.random() * (a.length-1)).toFixed(0);
-					b[i] = a[j];
-				}
-				var res=b.join("");
-				var count=0;
-				const result = [res[0]];
-				for(let x=1; x<res.length; x++)
-				  {
-				    count=count+1;
-					if(count==4)
-					 {
-					  result.push('-', res[x]);
-					  count=0;
-					 }
-					else
-					 {
-					  result.push(res[x]);
-					 }
-				  }
-				const apikey=result.join('');
-			    //insert into table
-			    let hash = bcrypt.hashSync(`${flags.passw}`,10);
-			    console.log(hash);
-				await connection.query(`INSERT INTO users VALUES (?,?,?,?,?,?)`,[`${flags.newuser}`,hash,`${flags.email}`,`${flags.quota}`,apikey,'user']);
-				console.log(apikey+" ");
-				console.log("Succesful");
+				let hash = bcrypt.hashSync(`${flags.passw}`);
+				await axios.post('https://localhost:8765/energy/api/Admin/users?' +`${flags.newuser}` +'&passw' + hash +'&email=' + `${flags.email}`  +'&quota=' + `${flags.quota}`);
+				
 			}
+			//modify user
 			else if (`${flags.moduser}` !== "undefined" && `${flags.passw}` !== "undefined" && `${flags.email}` !== "undefined" && `${flags.quota}` !== "undefined" ){
 			    let hash = bcrypt.hashSync(`${flags.passw}`);
-				await connection.query(`UPDATE users SET  pass=?,email=?,quota=? WHERE user=?  `,[hash,`${flags.email}`,`${flags.quota}`,`${flags.moduser}`]);
-				console.log("Succesful");
+				await axios.post('https://localhost:8765/energy/api/Admin/users?' +`${flags.newuser}` +'&passw=' + hash +'&email=' + `${flags.email}`  +'&quota=' + `${flags.quota}`);
 			}
-			else if (`${flags.userstatus}` !== "undefined"){
-				const ret=await connection.query(`SELECT user,email,apikey,quota FROM users WHERE user=?`,[`${flags.userstatus}`],function(err,result,fields){
-					if (err) throw err;
-					console.log(result);
-				});
+			//get userstatus
+			else if (`${flags.userstatus}` !== "undefined" && `${flags.passw}` == "undefined"){
+				await 	axios.get('https://localhost:8765/energy/api/Admin/users/' +`${flags.userstatus}`);		   
+				
 			}
+			else if (`${flags.userstatus}` !== "undefined" && `${flags.passw}` !== "undefined" && `${flags.email}` !== "undefined" && `${flags.quota}` !== "undefined"){
+				let hash = bcrypt.hashSync(`${flags.passw}`);
+				await 	axios.put('https://localhost:8765/energy/api/Admin/users/' +`${flags.userstatus}`+'?passw=' + hash +'&email=' + `${flags.email}`  +'&quota=' + `${flags.quota}`);		   
+				
+			}
+			//insert new data
 			else if (`${flags.newdata}` !== "undefined" && `${flags.source}` !== "undefined" ){
-				await connection.query(`LOAD DATA LOCAL INFILE ? CHARACTER SET UTF8 INTO TABLE ?  FIELDS TERMINATED BY ';' LINES TERMINATED BY '\r\n' 
-					IGNORE 1 LINES;`,[`${flags.source}`,`${flags.source}`],function(err,result,fields){
-					if (err) throw err;
-					console.log(result);
-					});
+				await 	axios.post('https://localhost:8765/energy/api/Admin/' +`${flags.newdata}` + '?' + `${flags.source}`);		   
 			}
 			else console.log("Unsuccesful" + `${flags.newuser}`,`${flags.pass}`,`${flags.email}`,`${flags.quota}`);
     }

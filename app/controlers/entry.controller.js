@@ -30,6 +30,17 @@ exports.findOne = (req, res) => {
 };
 
 
+exports.userstatus = (req, res) => {
+   Entry.cuserstatus(req.params.username, (err, data) => {
+    if (err) {
+        res.status(400).send({
+          message: "Bad Request"
+    	});
+    } 
+	else { res.send(data); }
+   });
+}
+
 exports.findTwo = (req, res) => {
    Entry.findByPars(req.params.AreaName,req.params.Resolution,req.params.Year,req.params.Month,req.params.Day, (err, data) => {
     if (err) {

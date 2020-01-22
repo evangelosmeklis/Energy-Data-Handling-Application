@@ -29,6 +29,27 @@ Entry.findByPk = (Id, result) => {
   });
 };
 
+
+
+Entry.cuserstatus = (username,result) => { //1a
+  sql.query(`SELECT user,email,quota,apikey FROM users WHERE user=? `,[username] , (err, res) => {
+    if (err) {
+      console.log("error: ", err);
+      result(err, null);
+      return;
+    }
+
+    if (res.length) {
+      console.log("found entry: ", res);
+      result(null,res);
+      return;
+    }
+
+    // not found Customer with the id
+    result({ kind: "not_found" }, null);
+  });
+};
+
 Entry.findByPars = (AreaName,Resolution,Year,Month,Day,result) => { //1a
   sql.query(`SELECT "entso-e" AS "Source","ActualTotalLoad" AS "Dataset",AreaName,AreaTypeCodeText AS "AreaTypeCode",MapCodeText AS "MapCode",ResolutionCodeText AS "ResolutionCode",Year,Month,Day,DateTime AS "DateTimeUTC",TotalLoadValue AS "ActualTotalLoadValue",UpdateTime AS "UpdateTimeUTC" FROM ActualTotalLoad AS A,AreaTypeCode AS T,MapCode AS M,ResolutionCode AS R WHERE AreaName = ? AND R.ResolutionCodeText = ? AND Year = ? AND Month = ? AND Day = ? AND A.ResolutionCodeId=R.Id AND A.MapCodeId=M.Id AND A.AreaTypeCodeId=T.Id`,[AreaName,Resolution,Year,Month,Day] , (err, res) => {
     if (err) {
