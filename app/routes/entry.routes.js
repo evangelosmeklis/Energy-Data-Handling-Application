@@ -125,7 +125,7 @@ module.exports = app => {
   
   app.get("/energy/api/Admin/users/:username",entry.userstatus);
   
-  app.put("/energy/api/Admin/users/:username", function(req,res){		
+  app.put("/energy/api/Admin/users/:username",async function(req,res){		
   		const correct =await getResults(req.user.apikey);
   		console.log(correct);
 		if (correct==1){
@@ -145,7 +145,7 @@ module.exports = app => {
 
   });
     
-  app.post("/energy/api/Admin/:table",function(req,res){
+  app.post("/energy/api/Admin/:table",async function(req,res){
  	  const correct =await getResults(req.user.apikey);
   	  console.log(correct);
 	  if (correct==1){

@@ -1,6 +1,29 @@
 const Entry = require("../models/ActualTotalLoad.model.js");
 const sql = require("../models/db.js");
 
+
+function getResults2(key) {
+  return new Promise((resolve, reject) => {
+    sql.query("SELECT apikey,quotas FROM users WHERE apikey=?", [key], (err, res1) => {
+      if (err) {
+        console.log("error: ", err);
+        reject(err);
+      } else if (res1.length && res1[0].quotas <=0) {
+        console.log("woops");
+        resolve(2); 
+      } 
+      else if (res1.length && res1[0].quotas>0) {
+        console.log("okey");
+        resolve(1);
+        
+      }
+      else {
+        resolve(0);
+      }
+    });
+  });
+}
+  
 // Find a single Customer with a customerId
 exports.findOne = (req, res) => {
    Entry.findByPk(req.params.Id, (err, data) => {
@@ -41,36 +64,43 @@ exports.userstatus = (req, res) => {
    });
 }
 
-exports.findTwo = (req, res) => {
-   Entry.findByPars(req.params.AreaName,req.params.Resolution,req.params.Year,req.params.Month,req.params.Day, (err, data) => {
-    if (err) {
-      if (err.kind === "not_found") {
-        res.status(403).send({
-          message: `No data`
-        });
-      } else {
-        res.status(400).send({
-          message: "Bad Request"
-        });
-      }
-    } else{
-		if(req.query.format!==undefined && req.query.format=="csv"){
-    		 const {Parser} = require('json2csv');
-    		 const json2csvParser=new Parser();
-    		 const csv=json2csvParser.parse(data);
-    		 res.send(csv);
-    	}
-    	else if (req.query.format==undefined || req.query.format=="json"){
-    		 res.send(data);
-        }
-        else { 
-       		res.status(400).send({
-       		message: "Bad Request"
-       		});
-        }
-	  }
+exports.findTwo =async function (req, res) {
+   //console.log(req);
+   //const correct =await getResults2(apikey);
+   //console.log(correct);
+   //if (correct==1){
+	   Entry.findByPars(req.params.AreaName,req.params.Resolution,req.params.Year,req.params.Month,req.params.Day, (err, data) => {
+		if (err) {
+		  if (err.kind === "not_found") {
+		    res.status(403).send({
+		      message: `No data`
+		    });
+		  } else {
+		    res.status(400).send({
+		      message: "Bad Request"
+		    });
+		  }
+		} else{ 
+			if(req.query.format!==undefined && req.query.format=="csv"){
+				 const {Parser} = require('json2csv');
+				 const json2csvParser=new Parser();
+				 const csv=json2csvParser.parse(data);
+				 res.send(csv);
+			}
+			else if (req.query.format==undefined || req.query.format=="json"){
+				 res.send(data);
+		    }
+		    else { 
+		   		res.status(400).send({
+		   		message: "Bad Request"
+		   		});
+		    }
+		  }
 
-   });
+	   });
+   //}
+   //else if (correct==2) res.status(402).send({ message: "Out of Quota"});
+  // else res.status(401).send({message: "Not authorized"});
 }
 
 exports.findThree = (req, res) => {
