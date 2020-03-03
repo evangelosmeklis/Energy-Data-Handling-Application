@@ -1,0 +1,3 @@
+figlet APV2020
+npm run test
+node server.js
